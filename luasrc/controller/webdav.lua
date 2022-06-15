@@ -1,4 +1,4 @@
-module("luci.controller.verysync", package.seeall)
+module("luci.controller.webdav", package.seeall)
 
 function index()
 	if not nixio.fs.access("/etc/config/webdav.yaml") then
