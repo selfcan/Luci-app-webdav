@@ -1,7 +1,7 @@
 module("luci.controller.webdav", package.seeall)
 
 function index()
-	if not nixio.fs.access("/etc/config/webdav.yaml") then
+	if not nixio.fs.access("/etc/config/webdav") then
 		return
 	end
 
