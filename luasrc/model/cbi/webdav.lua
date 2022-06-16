@@ -6,20 +6,30 @@ m.description = translate("Simple Webdav  Project Address https://github.com/hac
 
 m:section(SimpleSection).template  = "webdav/webdav_status"
 
-s = m:section(TypedSection, "webdav")
+s = m:section(TypedSection, "arguments")
 s.addremove = false
 s.anonymous = true
 
-o = s:option(Flag, "enabled", translate("Enable"))
-o.rmempty = false
+view_enable = s:option(Flag,"enabled",translate("Enable"))
+view_cfg = s:option(TextValue, "1", nil)
+	view_cfg.rmempty = false
+	view_cfg.rows = 43
 
-o = s.option(form.TextValue, '_tmpl', null, _("This is the content of the file '/etc/webdav/webdav.yaml' from which your webdav configuration will be generated."));
-o.rows = 20;
-o.cfgvalue = function(section_id) {
-			return fs.trimmed('/etc/webdav/webdav.yaml');
-		};
-o.write = function(section_id, formvalue) {
-			return fs.write('/etc/webdav/webdav.yaml', formvalue.trim().replace(/\r\n/g, '\n') + '\n');
-		};
+	function view_cfg.cfgvalue()
+		return nixio.fs.readfile("/etc/webdav/webdav.yaml") or ""
+	end
 
+            function view_cfg.write(self, section, value)
+		sync_value_to_file(value, "/etc/webdav/webdav.yaml")
+	end
+
+            function sync_value_to_file(value, file)
+	value = value:gsub("\r\n?", "\n")
+	local old_value = nixio.fs.readfile(file)
+	if value ~= old_value then
+		nixio.fs.writefile(file, value)
+	end
+	os.execute("/etc/webdav_init.sh >/dev/null")
+	
+            end
 return m
